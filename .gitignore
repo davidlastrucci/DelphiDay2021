@@ -41,5 +41,5 @@ __recovery/
 # Statistics file
 *.stat
 
-#PowerPoint
-*.pptx
+#Slide
+Slide/
