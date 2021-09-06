@@ -102,10 +102,11 @@ type
 
     function GetColumns: String; virtual;
     function GetOrderBy: String; virtual;
+
     function InternalGetSqlSyntax(
       const AWhereColumns: TArray<TTColumnMap>): String; override;
 
-    function GetFilterTopSyntax: String; virtual; abstract;
+    function GetFilterPagingSyntax: String; virtual; abstract;
   public
     constructor Create(
       const AConnection: TTConnection;
@@ -123,7 +124,7 @@ type
 
   TTMetadataSyntax = class(TTSelectSyntax)
   strict protected
-    function GetFilterTopSyntax: String; override;
+    function GetFilterPagingSyntax: String; override;
   public
     constructor Create(
       const AConnection: TTConnection;
@@ -311,15 +312,14 @@ var
 begin
   LResult := TStringBuilder.Create;
   try
-    if (not FFilter.Top.OrderBy.IsEmpty) then
-      LResult.AppendFormat(' ORDER BY %s, ', [FFilter.Top.OrderBy])
+    LResult.Append(' ORDER BY ');
+    if not FFilter.Paging.OrderBy.IsEmpty then
+      LResult.Append(FFilter.Paging.OrderBy)
     else if Assigned(FTableMap.PrimaryKey) then
-      LResult.AppendFormat(' ORDER BY %s, ', [
-        FConnection.GetDatabaseObjectName(FTableMap.PrimaryKey.Name)]);
+      LResult.Append(
+        FConnection.GetDatabaseObjectName(FTableMap.PrimaryKey.Name));
 
     result := LResult.ToString();
-    if not result.IsEmpty then
-      result := result.Substring(0, result.Length - 2);
   finally
     LResult.Free;
   end;
@@ -333,14 +333,14 @@ begin
   LResult := TStringBuilder.Create;
   try
     LResult.Append('SELECT ');
-    if FFilter.Top.MaxRecord > 0 then
-      LResult.AppendFormat('%s ', [GetFilterTopSyntax]);
     LResult.Append(GetColumns());
     LResult.AppendFormat(' FROM %s', [
       FConnection.GetDatabaseObjectName(FTableMap.Name)]);
     if not FFilter.Where.IsEmpty then
       LResult.AppendFormat(' WHERE %s', [FFilter.Where]);
     LResult.Append(GetOrderBy());
+    if not FFilter.Paging.IsEmpty then
+      LResult.AppendFormat(' %s', [GetFilterPagingSyntax()]);
 
     result := LResult.ToString();
   finally
@@ -365,7 +365,7 @@ begin
     AConnection, AMapper, ATableMap, ATableMetadata, TTFilter.Create('0 = 1'));
 end;
 
-function TTMetadataSyntax.GetFilterTopSyntax: String;
+function TTMetadataSyntax.GetFilterPagingSyntax: string;
 begin
   result := String.Empty;
 end;

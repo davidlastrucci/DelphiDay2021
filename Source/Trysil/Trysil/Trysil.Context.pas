@@ -91,6 +91,7 @@ begin
 
   FMapper := TTMapper.Create;
   FMetadata := TTMetadata.Create(FMapper, FConnection);
+
   FProvider := TTProvider.Create(
     FConnection, Self, FMetadata, FMapper, AUseIdentityMap);
   FResolver := TTResolver.Create(FConnection, Self, FMetadata, FMapper);

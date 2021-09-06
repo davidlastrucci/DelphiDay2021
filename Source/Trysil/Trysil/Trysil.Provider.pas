@@ -39,8 +39,8 @@ type
     FContext: TObject;
     FMetadata: TTMetadata;
     FMapper: TTMapper;
-
     FIdentityMap: TTIdentityMap;
+
     FLazyOwner: TObjectList<TObject>;
 
     function InternalCreateEntity<T: class>(
@@ -134,9 +134,9 @@ end;
 
 destructor TTProvider.Destroy;
 begin
-  FLazyOwner.Free;
   if Assigned(FIdentityMap) then
     FIdentityMap.Free;
+  FLazyOwner.Free;
   inherited Destroy;
 end;
 
